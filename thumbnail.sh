@@ -32,9 +32,27 @@ then
         echo "$(tput setaf 2)using default seconds between keyframes: $(tput setaf 3)$setting$(tput sgr0)"
     fi
     ffmpeg -y -i $inputfile -vsync 0 -vf select="eq(pict_type\,I)*(isnan(prev_selected_t)+gte(t-prev_selected_t\,$setting))",tile=$tile -frames:v 1  $outputfile
+elif [ "$mode" == "equal" ]
+then
+    if [ -z "$setting" ] || (( $setting < 1 ))
+        then
+        setting="600" #seconds of video to look at
+        echo "$(tput setaf 2)only looking at the first $(tput setaf 3)$setting$(tput setaf 2) seconds.$(tput sgr0)"
+    fi
+    duration=$(ffprobe -i $inputfile -show_format -v quiet | sed -n 's/duration=//p')
+    if [ "$setting" -gt "${duration%.*}" ]
+    then
+        echo "$(tput setaf 1)video is shorter than $setting seconds$(tput sgr0)"
+        exit 1
+    fi
+    frames=$((${tile/"x"/"*"})) # 3x3 -> 3*3
+    sec_between=$(python3 -c "print($setting/$frames)")
+    echo $sec_between
+    ffmpeg -y -i $inputfile -vsync 0 -vf  "fps=1/$sec_between,tile=$tile" -frames:v 1 $outputfile
+# alternativ: select every x frame https://ffmpeg.org/ffmpeg-filters.html#select_002c-aselect
 else
 
     echo "$(tput setaf 1)invalid mode$(tput sgr0)"
-    echo "use \"best\" or \"fast\""
+    echo "use \"best\", \"equal\" or \"fast\""
     exit 1
 fi
