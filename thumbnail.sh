@@ -22,7 +22,7 @@ then
         setting="800"
         echo "$(tput setaf 2)using default number of frames to analyse: $(tput setaf 3)$setting$(tput sgr0)"
     fi
-    ffmpeg -y -i $inputfile -vsync 0 -vf  "thumbnail=$setting,tile=$tile" -frames:v 1 $outputfile
+     < /dev/null ffmpeg -y -i $inputfile -vsync 0 -vf  "thumbnail=$setting,tile=$tile" -frames:v 1 $outputfile
 
 elif [ "$mode" == "fast" ]
 then
@@ -31,7 +31,7 @@ then
         setting="120" #min seconds between keyframes
         echo "$(tput setaf 2)using default seconds between keyframes: $(tput setaf 3)$setting$(tput sgr0)"
     fi
-    ffmpeg -y -i $inputfile -vsync 0 -vf select="eq(pict_type\,I)*(isnan(prev_selected_t)+gte(t-prev_selected_t\,$setting))",tile=$tile -frames:v 1  $outputfile
+     < /dev/null ffmpeg -y -i $inputfile -vsync 0 -vf select="eq(pict_type\,I)*(isnan(prev_selected_t)+gte(t-prev_selected_t\,$setting))",tile=$tile -frames:v 1  $outputfile
 elif [ "$mode" == "equal" ]
 then
     if [ -z "$setting" ] || (( $setting < 1 ))
@@ -48,7 +48,7 @@ then
     frames=$((${tile/"x"/"*"})) # 3x3 -> 3*3
     sec_between=$(python3 -c "print($setting/$frames)")
     echo $sec_between
-    ffmpeg -y -i $inputfile -vsync 0 -vf  "fps=1/$sec_between,tile=$tile" -frames:v 1 $outputfile
+     < /dev/null ffmpeg -y -i $inputfile -vsync 0 -vf  "fps=1/$sec_between,tile=$tile" -frames:v 1 $outputfile
 # alternativ: select every x frame https://ffmpeg.org/ffmpeg-filters.html#select_002c-aselect
 else
 
