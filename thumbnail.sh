@@ -43,10 +43,11 @@ then
     if [ "$setting" -gt "${duration%.*}" ]
     then
         echo "$(tput setaf 1)video is shorter than $setting seconds$(tput sgr0)"
-        exit 1
+        LC_NUMERIC=C setting=$( printf "%.0f" $duration )
+        echo "$(tput setaf 2)generating thumbnails from full video ($setting seconds)$(tput sgr0)"
     fi
     frames=$((${tile/"x"/"*"})) # 3x3 -> 3*3
-    sec_between=$(python3 -c "print($setting/$frames)")
+    sec_between=$(python3 -c "print(int(round($setting/$frames)))")
     echo $sec_between
      < /dev/null ffmpeg -y -i $inputfile -vsync 0 -vf  "fps=1/$sec_between,tile=$tile" -frames:v 1 $outputfile
 # alternativ: select every x frame https://ffmpeg.org/ffmpeg-filters.html#select_002c-aselect
